@@ -23,6 +23,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->firstName . ' ' . $request->lastName,
             'email' => $request->email,
+            'type' => $request->type,
             'password' => bcrypt($request->password),
         ]);
     
@@ -52,9 +53,20 @@ class AuthController extends Controller
             return response()->json(['error' => 'Could not create token'], 500);
         }
 
+        $user = Auth::user();
+
+        $customClaims = [
+            'id' => $user->id,
+            'username' => $user->name,
+            'email' => $user->email,
+            'type' => $user->type
+        ];
+
+        $token = JWTAuth::claims($customClaims)->attempt($credentials);
+
         return response()->json([
             'token' => $token,
-            'user' => Auth::user()
+            'user' => $user
         ], 200);
     }
     

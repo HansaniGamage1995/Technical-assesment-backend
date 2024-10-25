@@ -15,4 +15,18 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function scopeGetAllOrders($query, $isAdmin = false, $userId) {
+        $query = $query->select('orders.*')
+            ->with('orderItems.product', 'user');
+        if(!$isAdmin) {
+            $query->where('orders.user_id', $userId);
+        }
+        return $query;
+    }
 }
